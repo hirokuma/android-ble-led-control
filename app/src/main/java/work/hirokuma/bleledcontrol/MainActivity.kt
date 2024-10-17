@@ -2,15 +2,10 @@ package work.hirokuma.bleledcontrol
 
 import android.Manifest
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,9 +19,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -34,6 +32,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,31 +45,68 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import work.hirokuma.bleledcontrol.ble.BleScan
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
-class MainActivity : ComponentActivity() {
-    private lateinit var bluetoothLeScanner: BluetoothLeScanner
+private const val TAG = "MainActivity"
 
+class MainActivity : ComponentActivity() {
+    private lateinit var bleScan: BleScan
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val bluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter = bluetoothManager.adapter
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        bleScan = BleScan(bluetoothLeScanner)
 
-        scanLeDevice()
+        val chk = checkPermission()
+        if (!chk) {
+            val reqPerm = requestPermission()
+            requestPermissionLauncher.launch(reqPerm)
+            return
+        }
+
         setContent {
             AppTheme {
-                DeviceScreen(listOf())
+                val compScope = rememberCoroutineScope()
+                var counter by remember { mutableIntStateOf(0) }
+                DeviceScreen(listOf(), {
+                    counter++
+                    val nowCounter = counter
+                    Log.d(TAG, "click: $counter")
+                    compScope.launch(Dispatchers.IO) {
+                        Log.d(TAG, "toString: ${this.toString()}")
+                        while (true) {
+                            delay(3000L)
+                            Log.d(TAG, "無限: nowCounter=$nowCounter, counter=$counter")
+                        }
+                    }
+                })
             }
         }
     }
 
-    private var scanning = false
-    private val handler = Handler(Looper.getMainLooper())
-
-    // Stops scanning after 10 seconds.
-    private val scanPeriod: Long = 10000
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission is granted. Continue the action or workflow in your
+                // app.
+                Log.d(TAG, "requestPermissionLauncher: isGranted")
+                bleScan.scanLeDevice()
+            } else {
+                // Explain to the user that the feature is unavailable because the
+                // feature requires a permission that the user has denied. At the
+                // same time, respect the user's decision. Don't link to system
+                // settings in an effort to convince the user to change their
+                // decision.
+                Log.d(TAG, "requestPermissionLauncher: !isGranted")
+            }
+        }
 
     private fun requestPermission(): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -105,66 +145,13 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    private fun scanLeDevice() {
-        val chk = checkPermission()
-        if (!chk) {
-            val reqPerm = requestPermission()
-            requestPermissionLauncher.launch(reqPerm)
-            return
-        }
-        if (!scanning) { // Stops scanning after a pre-defined scan period.
-            Log.d(TAG, "scanLeDevice: !scanning")
-            handler.postDelayed({
-                scanning = true
-                Log.d(TAG, "scanLeDevice: startScan")
-                bluetoothLeScanner.startScan(leScanCallback)
-            }, scanPeriod)
-        } else {
-            scanning = false
-            Log.d(TAG, "scanLeDevice: stopScan 2")
-            bluetoothLeScanner.stopScan(leScanCallback)
-        }
-    }
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission is granted. Continue the action or workflow in your
-                // app.
-                Log.d(TAG, "requestPermissionLauncher: isGranted")
-                scanLeDevice()
-            } else {
-                // Explain to the user that the feature is unavailable because the
-                // feature requires a permission that the user has denied. At the
-                // same time, respect the user's decision. Don't link to system
-                // settings in an effort to convince the user to change their
-                // decision.
-                Log.d(TAG, "requestPermissionLauncher: !isGranted")
-            }
-        }
-
-
-    //    private val leDeviceListAdapter = LeDeviceListAdapter()
-    // Device scan callback.
-    private val leScanCallback: ScanCallback = object : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult) {
-            super.onScanResult(callbackType, result)
-            Log.d(TAG, "onScanResult: ${result.device}")
-//            leDeviceListAdapter.addDevice(result.device)
-//            leDeviceListAdapter.notifyDataSetChanged()
-        }
-    }
-
-    private val TAG = javaClass.simpleName
 }
 
 @Composable
 fun DeviceList(list: List<String>, modifier: Modifier = Modifier) {
     LazyColumn(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            //.fillMaxSize()
     ) {
         items(list) { item ->
             Row(
@@ -188,7 +175,7 @@ fun DeviceList(list: List<String>, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceScreen(list: List<String>, modifier: Modifier = Modifier) {
+fun DeviceScreen(list: List<String>, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -201,7 +188,29 @@ fun DeviceScreen(list: List<String>, modifier: Modifier = Modifier) {
                 }
             )
         },
-        // bottomBar = {}
+         bottomBar = {
+             BottomAppBar {
+                 Surface (
+                     color = colorScheme.primary,
+                     contentColor = colorScheme.onPrimary,
+                     onClick = onClick,
+                     modifier = Modifier
+                         .fillMaxSize()
+                         .wrapContentSize(),
+                 ) {
+                     Row(
+                         modifier = Modifier
+                             .fillMaxSize()
+                             .wrapContentSize(),
+                     ) {
+                         Text(
+                             text = "scan",
+                             style = MaterialTheme.typography.bodyLarge,
+                         )
+                     }
+                 }
+             }
+         }
     ) { innerPadding ->
         Surface(
             modifier = modifier.fillMaxSize(),
@@ -230,6 +239,6 @@ fun DeviceScreen(list: List<String>, modifier: Modifier = Modifier) {
 fun DeviceListPreview() {
     AppTheme {
         val dummyData: List<String> = listOf("a1", "b2", "c3")
-        DeviceScreen(dummyData)
+        DeviceScreen(dummyData, { Log.d("preview", "click") })
     }
 }
