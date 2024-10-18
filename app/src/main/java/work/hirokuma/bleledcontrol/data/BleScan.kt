@@ -1,4 +1,4 @@
-package work.hirokuma.bleledcontrol.ble
+package work.hirokuma.bleledcontrol.data
 
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
