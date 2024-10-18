@@ -126,6 +126,7 @@ class MainActivity : ComponentActivity() {
                 Log.d(TAG, "許可あり")
                 return true
             }
+
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this, reqPerm
             ) -> {
@@ -137,6 +138,7 @@ class MainActivity : ComponentActivity() {
                 Log.d(TAG, "UIで説明しないといけないらしい")
                 return false
             }
+
             else -> {
                 // You can directly ask for the permission.
                 // The registered ActivityResultCallback gets the result of this request.
@@ -151,7 +153,6 @@ class MainActivity : ComponentActivity() {
 fun DeviceList(list: List<String>, modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier
-            //.fillMaxSize()
     ) {
         items(list) { item ->
             Row(
@@ -188,29 +189,21 @@ fun DeviceScreen(list: List<String>, onClick: () -> Unit, modifier: Modifier = M
                 }
             )
         },
-         bottomBar = {
-             BottomAppBar {
-                 Surface (
-                     color = colorScheme.primary,
-                     contentColor = colorScheme.onPrimary,
-                     onClick = onClick,
-                     modifier = Modifier
-                         .fillMaxSize()
-                         .wrapContentSize(),
-                 ) {
-                     Row(
-                         modifier = Modifier
-                             .fillMaxSize()
-                             .wrapContentSize(),
-                     ) {
-                         Text(
-                             text = "scan",
-                             style = MaterialTheme.typography.bodyLarge,
-                         )
-                     }
-                 }
-             }
-         }
+        bottomBar = {
+            BottomAppBar(
+                containerColor = colorScheme.primary,
+                contentColor = colorScheme.onPrimary,
+                modifier = Modifier.clickable(onClick = onClick),
+            ) {
+                Text(
+                    text = "scan",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentSize()
+                )
+            }
+        }
     ) { innerPadding ->
         Surface(
             modifier = modifier.fillMaxSize(),
