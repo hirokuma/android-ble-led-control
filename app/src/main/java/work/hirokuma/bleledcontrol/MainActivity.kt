@@ -9,17 +9,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import work.hirokuma.bleledcontrol.data.BleScan
 import work.hirokuma.bleledcontrol.ui.DeviceScreen
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
@@ -39,27 +30,11 @@ class MainActivity : ComponentActivity() {
         if (!chk) {
             val reqPerm = requestPermission()
             requestPermissionLauncher.launch(reqPerm)
-//            return
         }
 
         setContent {
             AppTheme {
-                val compScope = rememberCoroutineScope()
-                var counter by remember { mutableIntStateOf(0) }
-                val list = listOf<String>()
-                val myList by remember { mutableStateOf(list) }
-                DeviceScreen(myList, {
-                    counter++
-                    val nowCounter = counter
-                    Log.d(TAG, "click: $counter")
-                    compScope.launch(Dispatchers.IO) {
-                        Log.d(TAG, "toString: $this")
-                        while (true) {
-                            delay(3000L)
-                            Log.d(TAG, "無限: nowCounter=$nowCounter, counter=$counter")
-                        }
-                    }
-                })
+                DeviceScreen({ Log.d(TAG, "onClick") })
             }
         }
     }

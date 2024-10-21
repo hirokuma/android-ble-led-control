@@ -24,6 +24,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,37 +33,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import work.hirokuma.bleledcontrol.R
+import work.hirokuma.bleledcontrol.ui.model.ScanViewModel
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
-
-
-@Composable
-fun DeviceList(list: List<String>, modifier: Modifier = Modifier) {
-    LazyColumn(
-        modifier = modifier
-    ) {
-        items(list) { item ->
-            Row(
-                modifier = Modifier
-                    .height(48.dp)
-                    .border(width = 1.dp, color = colorScheme.primaryContainer)
-                    .clickable { Log.d("row", "click: $item") }
-            ) {
-                Spacer(Modifier.width(16.dp))
-                Text(
-                    text = ":$item",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(alignment = Alignment.CenterVertically),
-                    fontSize = 24.sp,
-                )
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceScreen(list: List<String>, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun DeviceScreen(onClick: () -> Unit, modifier: Modifier = Modifier, scanViewModel: ScanViewModel = ScanViewModel()) {
+    val scanUiState by scanViewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -96,12 +75,41 @@ fun DeviceScreen(list: List<String>, onClick: () -> Unit, modifier: Modifier = M
             contentColor = colorScheme.onBackground,
         ) {
             DeviceList(
-                list = list,
+                addressList = scanUiState.addressList,
                 modifier = Modifier.padding(innerPadding)
             )
         }
     }
 }
+
+@Composable
+fun DeviceList(
+    addressList: List<String>,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+    ) {
+        items(addressList) { item ->
+            Row(
+                modifier = Modifier
+                    .height(48.dp)
+                    .border(width = 1.dp, color = colorScheme.primaryContainer)
+                    .clickable { Log.d("row", "click: $item") }
+            ) {
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = ":$item",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(alignment = Alignment.CenterVertically),
+                    fontSize = 24.sp,
+                )
+            }
+        }
+    }
+}
+
 
 @Preview(
     showBackground = true,
@@ -115,8 +123,11 @@ fun DeviceScreen(list: List<String>, onClick: () -> Unit, modifier: Modifier = M
 )
 @Composable
 fun DeviceListPreview() {
+    val viewModel = ScanViewModel()
+    viewModel.addDeviceAddress("11:22:33:44:55:66")
+    viewModel.addDeviceAddress("22:33:44:55:66:77")
+    viewModel.addDeviceAddress("33:44:55:66:77:88")
     AppTheme {
-        val dummyData: List<String> = listOf("a1", "b2", "c3")
-        DeviceScreen(dummyData, { Log.d("preview", "click") })
+        DeviceScreen({ Log.d("preview", "click") }, scanViewModel = viewModel)
     }
 }
