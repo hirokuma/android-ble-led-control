@@ -38,7 +38,10 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceScreen(onClick: () -> Unit, modifier: Modifier = Modifier, scanViewModel: ScanViewModel = ScanViewModel()) {
+fun DeviceScreen(
+    modifier: Modifier = Modifier,
+    scanViewModel: ScanViewModel = ScanViewModel()
+) {
     val scanUiState by scanViewModel.uiState.collectAsState()
 
     Scaffold(
@@ -57,7 +60,7 @@ fun DeviceScreen(onClick: () -> Unit, modifier: Modifier = Modifier, scanViewMod
             BottomAppBar(
                 containerColor = colorScheme.primary,
                 contentColor = colorScheme.onPrimary,
-                modifier = Modifier.clickable(onClick = onClick),
+                modifier = Modifier.clickable(onClick = { scanViewModel.onClickScan() }),
             ) {
                 Text(
                     text = "scan",
@@ -128,6 +131,6 @@ fun DeviceListPreview() {
     viewModel.addDeviceAddress("22:33:44:55:66:77")
     viewModel.addDeviceAddress("33:44:55:66:77:88")
     AppTheme {
-        DeviceScreen({ Log.d("preview", "click") }, scanViewModel = viewModel)
+        DeviceScreen(scanViewModel = viewModel)
     }
 }

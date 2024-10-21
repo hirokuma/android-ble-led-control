@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                DeviceScreen({ Log.d(TAG, "onClick") })
+                DeviceScreen()
             }
         }
     }
