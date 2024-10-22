@@ -10,15 +10,13 @@ import android.util.Log
 private const val TAG = "BleScan"
 
 class BleScan(private val bluetoothLeScanner: BluetoothLeScanner) {
-    private var scanning = false
+    var scanning = false
+        private set
+
     private val handler = Handler(Looper.getMainLooper())
 
     // Stops scanning after 10 seconds.
     private val scanPeriod: Long = 10000
-
-    fun isScanning(): Boolean {
-        return scanning
-    }
 
     fun scanLeDevice() {
         try {
