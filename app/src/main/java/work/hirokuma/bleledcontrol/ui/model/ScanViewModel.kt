@@ -16,27 +16,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import work.hirokuma.bleledcontrol.data.BleScan
 import java.util.Date
-import javax.inject.Inject
 
 private const val TAG = "ScanViewModel"
 
-//@HiltViewModel
-//class ScanViewModel @Inject constructor(val context: Context): ViewModel() {
-//    private val bluetoothLeScanner: BluetoothLeScanner
-//    init {
-//        val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
-//        val bluetoothAdapter = bluetoothManager.adapter
-//        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-//    }
-
 @HiltViewModel(assistedFactory = ScanViewModelFactory::class)
 class ScanViewModel @AssistedInject constructor(
-    @Assisted val counter: Int
+    @Assisted context: Context
 ): ViewModel() {
+    private val bluetoothLeScanner: BluetoothLeScanner
     init {
-        Log.d(TAG, "init: $counter")
+        val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
+        val bluetoothAdapter = bluetoothManager.adapter
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
     }
 
     // UI state
@@ -78,5 +70,5 @@ class ScanViewModel @AssistedInject constructor(
 
 @AssistedFactory
 interface ScanViewModelFactory {
-    fun create(counter: Int) : ScanViewModel
+    fun create(context: Context) : ScanViewModel
 }

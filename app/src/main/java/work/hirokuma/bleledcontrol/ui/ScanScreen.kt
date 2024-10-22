@@ -44,18 +44,11 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 fun DeviceScreen(
     modifier: Modifier = Modifier,
 ) {
-    val bluetoothManager = LocalContext.current.getSystemService(BluetoothManager::class.java)
-    val bluetoothAdapter = bluetoothManager.adapter
-//    val scanViewModel =  ScanViewModel(123)
     val scanViewModel = hiltViewModel(
         creationCallback = { it: ScanViewModelFactory ->
-            it.create(1234)
+            it.create(LocalContext.current)
         }
     )
-
-
-//    val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-//    val scanViewModel =  ScanViewModel(LocalContext.current)
 
     val scanUiState by scanViewModel.uiState.collectAsState()
 
