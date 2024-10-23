@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import work.hirokuma.bleledcontrol.R
 import work.hirokuma.bleledcontrol.ui.model.ScanViewModel
+import work.hirokuma.bleledcontrol.ui.model.ScanViewModelFactory
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +44,11 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 fun DeviceScreen(
     modifier: Modifier = Modifier,
 ) {
-    val scanViewModel: ScanViewModel = hiltViewModel()
+    val scanViewModel: ScanViewModel = hiltViewModel(
+        creationCallback = { it: ScanViewModelFactory ->
+            it.create(10)
+        }
+    )
 
     val scanUiState by scanViewModel.uiState.collectAsState()
 

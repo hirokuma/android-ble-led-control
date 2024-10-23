@@ -23,9 +23,10 @@ import javax.inject.Inject
 
 private const val TAG = "ScanViewModel"
 
-@HiltViewModel
-class ScanViewModel @Inject constructor(
-    @ApplicationContext context: Context
+@HiltViewModel(assistedFactory = ScanViewModelFactory::class)
+class ScanViewModel @AssistedInject constructor(
+    @ApplicationContext context: Context,
+    @Assisted count: Int,
 ): ViewModel() {
     private var bleScan: BleScan
     private val bluetoothLeScanner: BluetoothLeScanner
@@ -34,6 +35,7 @@ class ScanViewModel @Inject constructor(
         val bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         bleScan = BleScan(bluetoothLeScanner)
+        Log.d(TAG, "init: $count")
     }
 
     // UI state
@@ -71,5 +73,9 @@ class ScanViewModel @Inject constructor(
             Log.d(TAG, "onClickScan: false")
         }
     }
+}
 
+@AssistedFactory
+interface ScanViewModelFactory {
+    fun create(count: Int) : ScanViewModel
 }
