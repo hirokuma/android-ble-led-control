@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -66,13 +67,25 @@ fun DeviceScreen(
             )
         },
         bottomBar = {
+            val containerColor: Color
+            val contentColor: Color
+            val buttonId: Int
+            if (scanUiState.scanning) {
+                containerColor = colorScheme.tertiary
+                contentColor = colorScheme.onTertiary
+                buttonId = R.string.scanning_button
+            } else {
+                containerColor = colorScheme.primary
+                contentColor = colorScheme.onPrimary
+                buttonId = R.string.scan_button
+            }
             BottomAppBar(
-                containerColor = colorScheme.primary,
-                contentColor = colorScheme.onPrimary,
+                containerColor = containerColor,
+                contentColor = contentColor,
                 modifier = Modifier.clickable(onClick = { scanViewModel.onClickScan() }),
             ) {
                 Text(
-                    text = "scan",
+                    text = stringResource(buttonId),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .fillMaxSize()
