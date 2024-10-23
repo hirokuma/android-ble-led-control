@@ -44,9 +44,10 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 fun DeviceScreen(
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val scanViewModel = hiltViewModel(
         creationCallback = { it: ScanViewModelFactory ->
-            it.create(LocalContext.current)
+            it.create(context)
         }
     )
 
