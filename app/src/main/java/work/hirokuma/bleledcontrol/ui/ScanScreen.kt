@@ -1,6 +1,5 @@
 package work.hirokuma.bleledcontrol.ui
 
-import android.bluetooth.BluetoothManager
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.border
@@ -29,7 +28,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import work.hirokuma.bleledcontrol.R
-import work.hirokuma.bleledcontrol.ui.model.ScanViewModelFactory
+import work.hirokuma.bleledcontrol.ui.model.ScanViewModel
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,12 +43,7 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 fun DeviceScreen(
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val scanViewModel = hiltViewModel(
-        creationCallback = { it: ScanViewModelFactory ->
-            it.create(context)
-        }
-    )
+    val scanViewModel: ScanViewModel = hiltViewModel()
 
     val scanUiState by scanViewModel.uiState.collectAsState()
 

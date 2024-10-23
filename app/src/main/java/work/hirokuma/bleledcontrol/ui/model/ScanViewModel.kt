@@ -10,25 +10,30 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import work.hirokuma.bleledcontrol.data.BleScan
 import java.util.Date
+import javax.inject.Inject
 
 private const val TAG = "ScanViewModel"
 
-@HiltViewModel(assistedFactory = ScanViewModelFactory::class)
-class ScanViewModel @AssistedInject constructor(
-    @Assisted context: Context
+@HiltViewModel
+class ScanViewModel @Inject constructor(
+    @ApplicationContext context: Context
 ): ViewModel() {
+    private var bleScan: BleScan
     private val bluetoothLeScanner: BluetoothLeScanner
     init {
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        bleScan = BleScan(bluetoothLeScanner)
     }
 
     // UI state
@@ -51,6 +56,7 @@ class ScanViewModel @AssistedInject constructor(
                 it.copy(scanning = true)
             }
             Log.d(TAG, "onClickScan: true")
+            bleScan.scanLeDevice()
             viewModelScope.launch {
                 while (uiState.value.scanning) {
                     delay(5000L)
@@ -66,9 +72,4 @@ class ScanViewModel @AssistedInject constructor(
         }
     }
 
-}
-
-@AssistedFactory
-interface ScanViewModelFactory {
-    fun create(context: Context) : ScanViewModel
 }
