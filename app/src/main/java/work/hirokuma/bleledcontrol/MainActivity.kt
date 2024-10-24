@@ -1,7 +1,6 @@
 package work.hirokuma.bleledcontrol
 
 import android.Manifest
-import android.bluetooth.BluetoothManager
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -12,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import work.hirokuma.bleledcontrol.data.BleScan
 import work.hirokuma.bleledcontrol.ui.DeviceScreen
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
@@ -20,14 +18,10 @@ private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private lateinit var bleScan: BleScan
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val bluetoothManager = getSystemService(BluetoothManager::class.java)
-        val bluetoothAdapter = bluetoothManager.adapter
-        val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-        bleScan = BleScan(bluetoothLeScanner)
 
+        // TODO Composableに実装し直す
         val chk = checkPermission()
         if (!chk) {
             val reqPerm = requestPermission()
@@ -49,7 +43,6 @@ class MainActivity : ComponentActivity() {
                 // Permission is granted. Continue the action or workflow in your
                 // app.
                 Log.d(TAG, "requestPermissionLauncher: isGranted")
-                bleScan.scanLeDevice()
             } else {
                 // Explain to the user that the feature is unavailable because the
                 // feature requires a permission that the user has denied. At the
