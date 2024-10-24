@@ -1,16 +1,9 @@
 package work.hirokuma.bleledcontrol.ui.model
 
-import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,17 +18,8 @@ private const val TAG = "ScanViewModel"
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    @ApplicationContext context: Context
+    private val bleScan: BleScan
 ): ViewModel() {
-    private var bleScan: BleScan
-    private val bluetoothLeScanner: BluetoothLeScanner
-    init {
-        val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
-        val bluetoothAdapter = bluetoothManager.adapter
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-        bleScan = BleScan(bluetoothLeScanner)
-    }
-
     // UI state
     private val _uiState = MutableStateFlow(ScanUiState())
     val uiState: StateFlow<ScanUiState> = _uiState.asStateFlow()

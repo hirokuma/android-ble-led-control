@@ -1,16 +1,40 @@
 package work.hirokuma.bleledcontrol.data
 
+import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val TAG = "BleScan"
 
-class BleScan(private val bluetoothLeScanner: BluetoothLeScanner) {
-    var scanning = false
+interface BleScan {
+    val scanning: Boolean
+
+    fun scanLeDevice()
+}
+
+class DefaultBleScan @Inject constructor(
+    @ApplicationContext context: Context
+): BleScan {
+    private val bluetoothLeScanner: BluetoothLeScanner
+    init {
+        val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
+        val bluetoothAdapter = bluetoothManager.adapter
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+    }
+
+    override var scanning = false
         private set
 
     private val handler = Handler(Looper.getMainLooper())
@@ -18,7 +42,7 @@ class BleScan(private val bluetoothLeScanner: BluetoothLeScanner) {
     // Stops scanning after 10 seconds.
     private val scanPeriod: Long = 10000
 
-    fun scanLeDevice() {
+    override fun scanLeDevice() {
         try {
             if (!scanning) { // Stops scanning after a pre-defined scan period.
                 Log.d(TAG, "scanLeDevice: !scanning")
@@ -48,4 +72,12 @@ class BleScan(private val bluetoothLeScanner: BluetoothLeScanner) {
 //            leDeviceListAdapter.notifyDataSetChanged()
         }
     }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class BleScanModule {
+    @Singleton
+    @Binds
+    abstract fun bindBleScan(default: DefaultBleScan): BleScan
 }
