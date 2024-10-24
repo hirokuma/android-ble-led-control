@@ -1,4 +1,4 @@
-package work.hirokuma.bleledcontrol
+package work.hirokuma.bleledcontrol.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import work.hirokuma.bleledcontrol.ui.DeviceScreen
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
 private const val TAG = "MainActivity"
