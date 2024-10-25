@@ -8,13 +8,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val TAG = "BleScan"
 
@@ -24,9 +17,7 @@ interface BleScan {
     fun scanLeDevice()
 }
 
-class DefaultBleScan @Inject constructor(
-    @ApplicationContext context: Context
-): BleScan {
+class DefaultBleScan(context: Context): BleScan {
     private val bluetoothLeScanner: BluetoothLeScanner
     init {
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
@@ -72,12 +63,4 @@ class DefaultBleScan @Inject constructor(
 //            leDeviceListAdapter.notifyDataSetChanged()
         }
     }
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class BleScanModule {
-    @Singleton
-    @Binds
-    abstract fun bindBleScan(default: DefaultBleScan): BleScan
 }
