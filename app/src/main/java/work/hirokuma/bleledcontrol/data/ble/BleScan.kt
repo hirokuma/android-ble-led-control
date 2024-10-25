@@ -1,4 +1,4 @@
-package work.hirokuma.bleledcontrol.data
+package work.hirokuma.bleledcontrol.data.ble
 
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
@@ -11,13 +11,7 @@ import android.util.Log
 
 private const val TAG = "BleScan"
 
-interface BleScan {
-    val scanning: Boolean
-
-    fun scanLeDevice()
-}
-
-class DefaultBleScan(context: Context): BleScan {
+class BleScan(context: Context) {
     private val bluetoothLeScanner: BluetoothLeScanner
     init {
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
@@ -25,7 +19,7 @@ class DefaultBleScan(context: Context): BleScan {
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
     }
 
-    override var scanning = false
+    var scanning = false
         private set
 
     private val handler = Handler(Looper.getMainLooper())
@@ -33,7 +27,7 @@ class DefaultBleScan(context: Context): BleScan {
     // Stops scanning after 10 seconds.
     private val scanPeriod: Long = 10000
 
-    override fun scanLeDevice() {
+    fun scanLeDevice() {
         try {
             if (!scanning) { // Stops scanning after a pre-defined scan period.
                 Log.d(TAG, "scanLeDevice: !scanning")

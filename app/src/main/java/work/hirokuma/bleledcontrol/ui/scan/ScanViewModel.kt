@@ -1,4 +1,4 @@
-package work.hirokuma.bleledcontrol.ui.model
+package work.hirokuma.bleledcontrol.ui.scan
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import work.hirokuma.bleledcontrol.data.BleScan
+import work.hirokuma.bleledcontrol.data.ble.BleScan
 import java.util.Date
 import javax.inject.Inject
 

@@ -1,4 +1,4 @@
-package work.hirokuma.bleledcontrol.ui
+package work.hirokuma.bleledcontrol.ui.scan
 
 import android.content.res.Configuration
 import android.util.Log
@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import work.hirokuma.bleledcontrol.R
-import work.hirokuma.bleledcontrol.ui.model.ScanViewModel
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -6,8 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import work.hirokuma.bleledcontrol.data.BleScan
-import work.hirokuma.bleledcontrol.data.DefaultBleScan
+import work.hirokuma.bleledcontrol.data.ble.BleScan
 import javax.inject.Singleton
 
 @Module
@@ -18,6 +17,6 @@ object BleScanModule {
     fun provideBleScan(
         @ApplicationContext context: Context
     ): BleScan {
-        return DefaultBleScan(context)
+        return BleScan(context)
     }
 }
