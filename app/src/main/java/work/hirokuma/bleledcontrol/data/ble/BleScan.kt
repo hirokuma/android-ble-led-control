@@ -24,37 +24,54 @@ class BleScan(context: Context) {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    // Stops scanning after 10 seconds.
-    private val scanPeriod: Long = 10000
+    // Stops scanning after 1 seconds.
+    private val scanPeriod: Long = 1000
 
-    fun scanLeDevice() {
+    private var resultCallback: ((String) -> Unit)? = null
+
+    fun startScan(resultCallback: ((String) -> Unit)?): Boolean {
+        if (scanning) {
+            Log.d(TAG, "already scanning")
+            return false
+        }
         try {
-            if (!scanning) { // Stops scanning after a pre-defined scan period.
-                Log.d(TAG, "scanLeDevice: !scanning")
-                handler.postDelayed({
-                    scanning = true
-                    Log.d(TAG, "scanLeDevice: startScan")
-                    bluetoothLeScanner.startScan(leScanCallback)
-                }, scanPeriod)
-            } else {
-                scanning = false
-                Log.d(TAG, "scanLeDevice: stopScan 2")
-                bluetoothLeScanner.stopScan(leScanCallback)
-            }
+            Log.d(TAG, "scanLeDevice: !scanning")
+            handler.postDelayed({
+                Log.d(TAG, "scanLeDevice: startScan")
+                bluetoothLeScanner.startScan(leScanCallback)
+            }, scanPeriod)
+            this.resultCallback = resultCallback
+            scanning = true
         }
         catch (e: SecurityException) {
-            Log.e(TAG, "")
+            Log.e(TAG, "startScan: $e")
+            return false
         }
+        return true
     }
 
-    //    private val leDeviceListAdapter = LeDeviceListAdapter()
+    fun stopScan(): Boolean {
+        if (!scanning) {
+            Log.d(TAG, "not scanning")
+            return false
+        }
+        try {
+            bluetoothLeScanner.stopScan(leScanCallback)
+            scanning = false
+        }
+        catch (e: SecurityException) {
+            Log.e(TAG, "stopScan: $e")
+            return false
+        }
+        return true
+    }
+
     // Device scan callback.
     private val leScanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             Log.d(TAG, "onScanResult: ${result.device}")
-//            leDeviceListAdapter.addDevice(result.device)
-//            leDeviceListAdapter.notifyDataSetChanged()
+            resultCallback?.let { it(result.device.address) }
         }
     }
 }

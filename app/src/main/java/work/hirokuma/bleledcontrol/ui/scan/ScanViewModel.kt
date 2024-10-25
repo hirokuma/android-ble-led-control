@@ -2,16 +2,12 @@ package work.hirokuma.bleledcontrol.ui.scan
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import work.hirokuma.bleledcontrol.data.ble.BleScan
-import java.util.Date
 import javax.inject.Inject
 
 private const val TAG = "ScanViewModel"
@@ -24,36 +20,35 @@ class ScanViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ScanUiState())
     val uiState: StateFlow<ScanUiState> = _uiState.asStateFlow()
 
-    fun addDeviceAddress(address: String) {
-        _uiState.update {
-            val newList = it.addressList.toMutableList()
+    private fun addDeviceAddress(address: String) {
+        if (_uiState.value.addressList.find { it == address } != null) {
+            return
+        }
+        _uiState.update { state ->
+            val newList = state.addressList.toMutableList()
             newList.add(address)
-            it.copy(
+            state.copy(
                 addressList = newList,
             )
         }
     }
     
     fun onClickScan() {
-        if (!uiState.value.scanning) {
+        if (!bleScan.scanning) {
             _uiState.update {
                 it.copy(scanning = true)
             }
             Log.d(TAG, "onClickScan: true")
-            bleScan.scanLeDevice()
-            viewModelScope.launch {
-                while (uiState.value.scanning) {
-                    delay(5000L)
-                    val now = Date() // format(DateTimeFormatter.ISO_LOCAL_DATE)
-                    addDeviceAddress("$now")
-                }
+            bleScan.startScan { address ->
+                Log.d(TAG, "callback: $address")
+                addDeviceAddress(address)
             }
         } else {
             _uiState.update {
                 it.copy(scanning = false)
             }
             Log.d(TAG, "onClickScan: false")
+            bleScan.stopScan()
         }
     }
-
 }
