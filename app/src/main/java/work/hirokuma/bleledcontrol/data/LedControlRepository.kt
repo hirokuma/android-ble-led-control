@@ -2,7 +2,6 @@ package work.hirokuma.bleledcontrol.data
 
 import android.util.Log
 import work.hirokuma.bleledcontrol.data.ble.BleScan
-import javax.inject.Inject
 
 private const val TAG = "LedControlRepository"
 
@@ -12,7 +11,7 @@ interface LedControlRepository {
     fun stopDeviceSearch()
 }
 
-class BleLedControlRepository @Inject constructor(
+class BleLedControlRepository(
     private val bleScan: BleScan
 ): LedControlRepository {
     override val searching: Boolean

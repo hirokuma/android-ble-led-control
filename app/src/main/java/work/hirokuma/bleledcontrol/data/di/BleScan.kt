@@ -1,7 +1,6 @@
 package work.hirokuma.bleledcontrol.data.di
 
 import android.content.Context
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,23 +11,14 @@ import work.hirokuma.bleledcontrol.data.LedControlRepository
 import work.hirokuma.bleledcontrol.data.ble.BleScan
 import javax.inject.Singleton
 
-//@Module
-//@InstallIn(SingletonComponent::class)
-//object LedControlRepositoryModule {
-//    @Singleton
-//    @Provides
-//    fun provideLedControlRepository(
-//        @ApplicationContext context: Context
-//    ): LedControlRepository {
-//        return BleLedControlRepository(BleScan(context))
-//    }
-
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class LedControlRepositoryModule {
+object LedControlRepositoryModule {
     @Singleton
-    @Binds
-    abstract fun bindLedControlRepository(repository: BleLedControlRepository): LedControlRepository
+    @Provides
+    fun provideLedControlRepository(bleScan: BleScan): LedControlRepository {
+        return BleLedControlRepository(bleScan)
+    }
 }
 
 @Module
