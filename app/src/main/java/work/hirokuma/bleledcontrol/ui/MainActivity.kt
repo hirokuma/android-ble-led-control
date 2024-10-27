@@ -11,7 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import work.hirokuma.bleledcontrol.ui.scan.DeviceScreen
+import work.hirokuma.bleledcontrol.ui.screens.DeviceScreen
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
 private const val TAG = "MainActivity"

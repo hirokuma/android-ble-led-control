@@ -1,4 +1,4 @@
-package work.hirokuma.bleledcontrol.ui.scan
+package work.hirokuma.bleledcontrol.ui.screens
 
 import android.content.res.Configuration
 import android.util.Log
