@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import work.hirokuma.bleledcontrol.data.Device
 
 private const val TAG = "BleScan"
 
@@ -27,9 +28,9 @@ class BleScan(context: Context) {
     // Stops scanning after 1 seconds.
     private val scanPeriod: Long = 1000
 
-    private var resultCallback: ((String) -> Unit)? = null
+    private var resultCallback: ((Device) -> Unit)? = null
 
-    fun startScan(resultCallback: ((String) -> Unit)?): Boolean {
+    fun startScan(resultCallback: (Device) -> Unit): Boolean {
         if (scanning) {
             Log.d(TAG, "already scanning")
             return false
@@ -38,7 +39,7 @@ class BleScan(context: Context) {
             Log.d(TAG, "scanLeDevice: !scanning")
             handler.postDelayed({
                 Log.d(TAG, "scanLeDevice: startScan")
-                bluetoothLeScanner.startScan(leScanCallback)
+                bluetoothLeScanner.startScan(scanCallback)
             }, scanPeriod)
             this.resultCallback = resultCallback
             scanning = true
@@ -56,8 +57,9 @@ class BleScan(context: Context) {
             return false
         }
         try {
-            bluetoothLeScanner.stopScan(leScanCallback)
+            bluetoothLeScanner.stopScan(scanCallback)
             scanning = false
+            resultCallback = null
         }
         catch (e: SecurityException) {
             Log.e(TAG, "stopScan: $e")
@@ -67,11 +69,19 @@ class BleScan(context: Context) {
     }
 
     // Device scan callback.
-    private val leScanCallback: ScanCallback = object : ScanCallback() {
+    private val scanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             Log.d(TAG, "onScanResult: ${result.device}")
-            resultCallback?.let { it(result.device.address) }
+            resultCallback?.let {
+                it(
+                    Device(
+                        address = result.device.address,
+                        name = result.device.toString(),
+                        ssid = result.rssi
+                    )
+                )
+            }
         }
     }
 }

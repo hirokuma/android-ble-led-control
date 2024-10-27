@@ -2,19 +2,21 @@ package work.hirokuma.bleledcontrol.ui.screens
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import work.hirokuma.bleledcontrol.data.ble.BleScan
+import kotlinx.coroutines.launch
+import work.hirokuma.bleledcontrol.data.LedControlRepository
 import javax.inject.Inject
 
 private const val TAG = "ScanViewModel"
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    private val bleScan: BleScan
+    private val controlRepository: LedControlRepository
 ): ViewModel() {
     // UI state
     private val _uiState = MutableStateFlow(ScanUiState())
@@ -34,21 +36,21 @@ class ScanViewModel @Inject constructor(
     }
     
     fun onClickScan() {
-        if (!bleScan.scanning) {
+        if (!controlRepository.searching) {
             _uiState.update {
                 it.copy(scanning = true)
             }
-            Log.d(TAG, "onClickScan: true")
-            bleScan.startScan { address ->
-                Log.d(TAG, "callback: $address")
-                addDeviceAddress(address)
+            Log.d(TAG, "onClickScan: start searching")
+            controlRepository.startDeviceSearch { device ->
+                Log.d(TAG, "callback: $device.address")
+                addDeviceAddress(device.address)
             }
         } else {
             _uiState.update {
                 it.copy(scanning = false)
             }
-            Log.d(TAG, "onClickScan: false")
-            bleScan.stopScan()
+            Log.d(TAG, "onClickScan: stop searching")
+            controlRepository.stopDeviceSearch()
         }
     }
 }
