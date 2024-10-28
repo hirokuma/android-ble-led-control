@@ -73,19 +73,20 @@ class BleScan(context: Context) {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             Log.d(TAG, "onScanResult: ${result.device}")
-            val record = result.scanRecord
+            val record = result.scanRecord ?: return
             Log.d(TAG, "ScanRecord: $result.scanRecord}")
-            val deviceName = record?.deviceName
-            if (deviceName != null) {
-                resultCallback?.let {
-                    it(
-                        Device(
-                            address = result.device.address,
-                            name = deviceName,
-                            ssid = result.rssi
-                        )
+            if (record.deviceName == null) {
+                return
+            }
+            resultCallback?.let {
+                it(
+                    Device(
+                        address = result.device.address,
+                        name = record.deviceName!!,
+                        ssid = result.rssi,
+                        scanRecord = record
                     )
-                }
+                )
             }
         }
     }

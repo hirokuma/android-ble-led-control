@@ -1,6 +1,5 @@
 package work.hirokuma.bleledcontrol.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,19 +18,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import work.hirokuma.bleledcontrol.R
-import work.hirokuma.bleledcontrol.data.Device
-
-private const val TAG = "ControlScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ControlScreen(
-    deviceAddress: String,
+    scanViewModel: ScanViewModel,
     navBackScreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val scanUiState by scanViewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -40,7 +37,7 @@ fun ControlScreen(
                     titleContentColor = colorScheme.primary,
                 ),
                 title = {
-                    Text(deviceAddress)
+                    Text(scanUiState.selectedDevice?.deviceName ?: "no name")
                 }
             )
         },

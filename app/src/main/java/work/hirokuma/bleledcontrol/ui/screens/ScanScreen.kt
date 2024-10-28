@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import work.hirokuma.bleledcontrol.R
 import work.hirokuma.bleledcontrol.data.Device
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
@@ -40,10 +39,10 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(
+    scanViewModel: ScanViewModel,
     navControlScreen: (Device) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scanViewModel: ScanViewModel = hiltViewModel()
     val scanUiState by scanViewModel.uiState.collectAsState()
 
     Scaffold(
@@ -95,7 +94,10 @@ fun ScanScreen(
                 deviceList = scanUiState.deviceList,
                 modifier = Modifier.padding(innerPadding),
                 scanning = scanUiState.scanning,
-                onItemClicked = { item -> navControlScreen(item) },
+                onItemClicked = {device ->
+                    scanViewModel.selectDevice(device)
+                    navControlScreen(device)
+                },
             )
         }
     }
