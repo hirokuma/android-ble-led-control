@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import work.hirokuma.bleledcontrol.data.Device
 import work.hirokuma.bleledcontrol.data.LedControlRepository
 import javax.inject.Inject
 
@@ -20,28 +21,28 @@ class ScanViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ScanUiState())
     val uiState: StateFlow<ScanUiState> = _uiState.asStateFlow()
 
-    private fun addDeviceAddress(address: String) {
-        if (_uiState.value.addressList.find { it == address } != null) {
+    private fun addDevice(device: Device) {
+        if (_uiState.value.deviceList.find { it.address == device.address } != null) {
             return
         }
         _uiState.update { state ->
-            val newList = state.addressList.toMutableList()
-            newList.add(address)
+            val newList = state.deviceList.toMutableList()
+            newList.add(device)
             state.copy(
-                addressList = newList,
+                deviceList = newList,
             )
         }
     }
     
-    fun onClickScan() {
+    fun onScanButtonClicked() {
         if (!controlRepository.searching) {
             _uiState.update {
                 it.copy(scanning = true)
             }
             Log.d(TAG, "onClickScan: start searching")
             controlRepository.startDeviceSearch { device ->
-                Log.d(TAG, "callback: $device.address")
-                addDeviceAddress(device.address)
+                Log.d(TAG, "callback: $device.address -- $device.name")
+                addDevice(device)
             }
         } else {
             _uiState.update {

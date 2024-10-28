@@ -1,7 +1,6 @@
 package work.hirokuma.bleledcontrol.ui.screens
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,15 +34,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import work.hirokuma.bleledcontrol.R
+import work.hirokuma.bleledcontrol.data.Device
 import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceScreen(
+fun ScanScreen(
+    navControlScreen: (Device) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scanViewModel: ScanViewModel = hiltViewModel()
-
     val scanUiState by scanViewModel.uiState.collectAsState()
 
     Scaffold(
@@ -74,7 +74,7 @@ fun DeviceScreen(
             BottomAppBar(
                 containerColor = containerColor,
                 contentColor = contentColor,
-                modifier = Modifier.clickable(onClick = { scanViewModel.onClickScan() }),
+                modifier = Modifier.clickable(onClick = { scanViewModel.onScanButtonClicked() }),
             ) {
                 Text(
                     text = stringResource(buttonId),
@@ -92,9 +92,10 @@ fun DeviceScreen(
             contentColor = colorScheme.onBackground,
         ) {
             DeviceList(
-                addressList = scanUiState.addressList,
+                deviceList = scanUiState.deviceList,
                 modifier = Modifier.padding(innerPadding),
-                scanning = scanUiState.scanning
+                scanning = scanUiState.scanning,
+                onItemClicked = { item -> navControlScreen(item) },
             )
         }
     }
@@ -102,16 +103,17 @@ fun DeviceScreen(
 
 @Composable
 fun DeviceList(
-    addressList: List<String>,
+    deviceList: List<Device>,
     modifier: Modifier = Modifier,
-    scanning: Boolean = false,
+    scanning: Boolean,
+    onItemClicked: (Device) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
     ) {
-        items(addressList) { item ->
+        items(deviceList) { item ->
             OutlinedCard(
-                onClick = { Log.d("row", "click: $item") },
+                onClick = { onItemClicked(item) },
                 enabled = !scanning,
                 border = BorderStroke(0.dp, color = Color.Transparent),
                 shape = RectangleShape,
@@ -119,7 +121,7 @@ fun DeviceList(
             ) {
                 Box(Modifier.fillMaxSize()) {
                     Text(
-                        text = item,
+                        text = "${item.address} - ${item.name}",
                         modifier = Modifier
                             .padding(start = 16.dp)
                             .align(alignment = Alignment.CenterStart),
@@ -144,14 +146,21 @@ fun DeviceList(
 )
 @Composable
 fun DeviceListPreview() {
-    val list = listOf("dummy1", "dummy2")
+    val list = listOf(
+        Device("dummy1", "00:11:22:33:44:55", -10),
+        Device("dummy2", "66:77:88:99:aa:bb", -20)
+    )
     AppTheme(dynamicColor = false) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = colorScheme.background,
             contentColor = colorScheme.onBackground,
         ) {
-            DeviceList(list)
+            DeviceList(
+                deviceList = list,
+                scanning = false,
+                onItemClicked = {}
+            )
         }
     }
 }
