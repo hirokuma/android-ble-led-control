@@ -5,8 +5,6 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import work.hirokuma.bleledcontrol.data.Device
 
@@ -23,11 +21,6 @@ class BleScan(context: Context) {
     var scanning = false
         private set
 
-    private val handler = Handler(Looper.getMainLooper())
-
-    // Stops scanning after 1 seconds.
-    private val scanPeriod: Long = 1000
-
     private var resultCallback: ((Device) -> Unit)? = null
 
     fun startScan(resultCallback: (Device) -> Unit): Boolean {
@@ -36,11 +29,8 @@ class BleScan(context: Context) {
             return false
         }
         try {
-            Log.d(TAG, "scanLeDevice: !scanning")
-            handler.postDelayed({
-                Log.d(TAG, "scanLeDevice: startScan")
-                bluetoothLeScanner.startScan(scanCallback)
-            }, scanPeriod)
+            Log.d(TAG, "scanLeDevice: startScan")
+            bluetoothLeScanner.startScan(scanCallback)
             this.resultCallback = resultCallback
             scanning = true
         }
