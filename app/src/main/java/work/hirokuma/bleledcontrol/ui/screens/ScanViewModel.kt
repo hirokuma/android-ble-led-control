@@ -2,11 +2,14 @@ package work.hirokuma.bleledcontrol.ui.screens
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import work.hirokuma.bleledcontrol.data.Device
 import work.hirokuma.bleledcontrol.data.LedControlRepository
 import javax.inject.Inject
@@ -62,6 +65,14 @@ class ScanViewModel @Inject constructor(
             state.copy(
                 selectedDevice = device,
             )
+        }
+        viewModelScope.launch {
+            var onoff = true
+            for (i in 1..50) {
+                controlRepository.setLed(onoff)
+                delay(500L)
+                onoff = !onoff
+            }
         }
     }
 

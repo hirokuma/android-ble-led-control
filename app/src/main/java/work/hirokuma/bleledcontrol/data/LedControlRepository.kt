@@ -11,6 +11,7 @@ interface LedControlRepository {
     fun stopDeviceSearch()
     fun connect(device: Device)
     fun disconnect()
+    fun setLed(onoff: Boolean)
 }
 
 class BleLedControlRepository(
@@ -38,5 +39,9 @@ class BleLedControlRepository(
     override fun disconnect() {
         Log.d(TAG, "disconnect")
         bleScan.disconnect()
+    }
+
+    override fun setLed(onoff: Boolean) {
+        bleScan.setLed(onoff)
     }
 }

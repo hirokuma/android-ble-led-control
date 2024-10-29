@@ -11,8 +11,11 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
+import android.net.wifi.aware.Characteristics
+import android.os.Build
 import android.util.Log
 import work.hirokuma.bleledcontrol.data.Device
+import java.util.UUID
 
 private const val TAG = "BleScan"
 
@@ -30,6 +33,8 @@ class BleScan(private val context: Context) {
     private var resultCallback: ((Device) -> Unit)? = null
 
     private var bleGatt: BluetoothGatt? = null
+    private var ledCharacteristic: BluetoothGattCharacteristic? = null
+    private var buttonCharacteristic: BluetoothGattCharacteristic? = null
 
     fun startScan(resultCallback: (Device) -> Unit): Boolean {
         if (scanning) {
@@ -122,12 +127,26 @@ class BleScan(private val context: Context) {
                     Log.e(TAG, "onServicesDiscovered: failed")
                     return
                 }
-                for (service in gatt.services) {
-                    Log.d(TAG, "service: ${service.uuid}")
-                    for (chas in service.characteristics) {
-                        Log.d(TAG, "  characteristic: ${chas.uuid}")
-                    }
+                val service = gatt.getService(BLINKY_SERVICE_UUID)
+                if (service == null) {
+                    Log.e(TAG, "onServicesDiscovered: service not exist")
+                    return
                 }
+                val ledChas = service.getCharacteristic(BLINKY_LED_CHARACTERISTIC_UUID)
+                if (ledChas == null) {
+                    Log.e(TAG, "onServicesDiscovered: LED characteristic not exist")
+                    return
+                }
+                val buttonChas = service.getCharacteristic(BLINKY_BUTTON_CHARACTERISTIC_UUID)
+                if (buttonChas == null) {
+                    Log.e(TAG, "onServicesDiscovered: Button characteristic not exist")
+                    return
+                }
+                ledCharacteristic = ledChas
+                buttonCharacteristic = buttonChas
+
+                Log.d(TAG, "onServicesDiscovered: done")
+                gatt.readCharacteristic(buttonCharacteristic)
             }
 
             override fun onCharacteristicRead(
@@ -136,7 +155,7 @@ class BleScan(private val context: Context) {
                 status: Int
             ) {
                 super.onCharacteristicRead(gatt, characteristic, status)
-                Log.d(TAG, "onCharacteristicRead: deprecated: status=$status")
+                Log.d(TAG, "onCharacteristicRead: deprecated: status=$status, value=${characteristic!!.value.toHexString()}")
             }
 
             override fun onCharacteristicRead(
@@ -218,12 +237,38 @@ class BleScan(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
+    fun setLed(onoff: Boolean) {
+        if (bleGatt == null || ledCharacteristic == null) {
+            Log.e(TAG, "setLed: characteristic is null")
+            return
+        }
+        val data = byteArrayOf(if (onoff) 1 else 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Log.d(TAG, "setLed: writeCharacteristic(API33): value=${onoff}")
+            bleGatt!!.writeCharacteristic(ledCharacteristic!!, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+        } else {
+            Log.d(TAG, "setLed: writeCharacteristic(deprecated): value=${onoff}")
+            ledCharacteristic!!.setValue(data)
+            bleGatt!!.writeCharacteristic(ledCharacteristic!!)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
     fun disconnect() {
         if (bleGatt == null) {
             Log.w(TAG, "already disconnected")
             return
         }
         bleGatt!!.disconnect()
+        ledCharacteristic = null
+        buttonCharacteristic = null
         bleGatt = null
+    }
+
+    // https://github.com/NordicSemiconductor/Android-nRF-Blinky/blob/506cabe8884364cd4302cc490664ec020c42728b/blinky/spec/src/main/java/no/nordicsemi/android/blinky/spec/BlinkySpec.kt#L10
+    companion object {
+        val BLINKY_SERVICE_UUID: UUID = UUID.fromString("00001523-1212-efde-1523-785feabcd123")
+        val BLINKY_BUTTON_CHARACTERISTIC_UUID: UUID = UUID.fromString("00001524-1212-efde-1523-785feabcd123")
+        val BLINKY_LED_CHARACTERISTIC_UUID: UUID = UUID.fromString("00001525-1212-efde-1523-785feabcd123")
     }
 }
