@@ -1,5 +1,6 @@
 package work.hirokuma.bleledcontrol.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -25,7 +26,9 @@ fun MainNavigation() {
         composable(NavRoute.Scan.name) {
             ScanScreen(
                 scanViewModel = scanViewModel,
-                navControlScreen = {
+                onItemClicked = { device ->
+                    Log.d(TAG, "ScanScreen.onItemClicked")
+                    scanViewModel.connectDevice(device)
                     navController.navigate(NavRoute.Control.name)
                 }
             )
@@ -33,7 +36,10 @@ fun MainNavigation() {
         composable(NavRoute.Control.name) {
             ControlScreen(
                 scanViewModel = scanViewModel,
-                navBackScreen = { navController.popBackStack() }
+                onBackButtonClicked = {
+                    scanViewModel.disconnectDevice()
+                    navController.popBackStack()
+                }
             )
         }
     }

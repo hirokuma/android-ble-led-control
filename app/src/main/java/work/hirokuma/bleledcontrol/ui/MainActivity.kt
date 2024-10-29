@@ -21,9 +21,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // TODO Composableに実装し直す
-        val chk = checkPermission()
+        val chk = checkPermissions()
         if (!chk) {
-            val reqPerm = requestPermission()
+            val reqPerm = requestPermissions()
             requestPermissionLauncher.launch(reqPerm)
         }
 
@@ -36,9 +36,9 @@ class MainActivity : ComponentActivity() {
 
     private val requestPermissionLauncher =
         registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { isGranted: Map<String, @JvmSuppressWildcards Boolean> ->
+            if (isGranted.containsValue(true)) {
                 // Permission is granted. Continue the action or workflow in your
                 // app.
                 Log.d(TAG, "requestPermissionLauncher: isGranted")
@@ -52,43 +52,52 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-    private fun requestPermission(): String {
+    private fun requestPermissions(): Array<String> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Manifest.permission.BLUETOOTH_SCAN
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+            )
         } else {
-            Manifest.permission.ACCESS_FINE_LOCATION
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
         }
     }
 
-    private fun checkPermission(): Boolean {
-        val reqPerm = requestPermission()
-        when {
-            ContextCompat.checkSelfPermission(
-                this, reqPerm
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                // You can use the API that requires the permission.
-                Log.d(TAG, "許可あり")
-                return true
-            }
+    private fun checkPermissions(): Boolean {
+        val reqPerms = requestPermissions()
+        for (reqPerm in reqPerms) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this, reqPerm
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // You can use the API that requires the permission.
+                    Log.d(TAG, "許可あり")
+//                    return true
+                }
 
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this, reqPerm
-            ) -> {
-                // In an educational UI, explain to the user why your app requires this
-                // permission for a specific feature to behave as expected, and what
-                // features are disabled if it's declined. In this UI, include a
-                // "cancel" or "no thanks" button that lets the user continue
-                // using your app without granting the permission.
-                Log.d(TAG, "UIで説明しないといけないらしい")
-                return false
-            }
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    this, reqPerm
+                ) -> {
+                    // In an educational UI, explain to the user why your app requires this
+                    // permission for a specific feature to behave as expected, and what
+                    // features are disabled if it's declined. In this UI, include a
+                    // "cancel" or "no thanks" button that lets the user continue
+                    // using your app without granting the permission.
+                    Log.d(TAG, "UIで説明しないといけないらしい")
+                    return false
+                }
 
-            else -> {
-                // You can directly ask for the permission.
-                // The registered ActivityResultCallback gets the result of this request.
-                Log.d(TAG, "たずねよう")
-                return false
+                else -> {
+                    // You can directly ask for the permission.
+                    // The registered ActivityResultCallback gets the result of this request.
+                    Log.d(TAG, "たずねよう")
+                    return false
+                }
             }
         }
+        Log.e(TAG, "最後まですすんだ")
+        return true
     }
 }

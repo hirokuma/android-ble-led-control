@@ -34,15 +34,7 @@ class ScanViewModel @Inject constructor(
         }
     }
 
-    fun selectDevice(device: Device) {
-        _uiState.update { state ->
-            state.copy(
-                selectedDevice = device,
-            )
-        }
-    }
-    
-    fun onScanButtonClicked() {
+    fun startDeviceScan() {
         if (!controlRepository.searching) {
             _uiState.update {
                 it.copy(
@@ -62,5 +54,18 @@ class ScanViewModel @Inject constructor(
             Log.d(TAG, "onClickScan: stop searching")
             controlRepository.stopDeviceSearch()
         }
+    }
+
+    fun connectDevice(device: Device) {
+        controlRepository.connect(device)
+        _uiState.update { state ->
+            state.copy(
+                selectedDevice = device,
+            )
+        }
+    }
+
+    fun disconnectDevice() {
+        controlRepository.disconnect()
     }
 }

@@ -24,7 +24,7 @@ import work.hirokuma.bleledcontrol.R
 @Composable
 fun ControlScreen(
     scanViewModel: ScanViewModel,
-    navBackScreen: () -> Unit,
+    onBackButtonClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scanUiState by scanViewModel.uiState.collectAsState()
@@ -45,7 +45,7 @@ fun ControlScreen(
             BottomAppBar(
                 containerColor = colorScheme.primary,
                 contentColor = colorScheme.onPrimary,
-                modifier = Modifier.clickable(onClick = { navBackScreen() }),
+                modifier = Modifier.clickable(onClick = { onBackButtonClicked() }),
             ) {
                 Text(
                     text = stringResource(R.string.back_button),
@@ -64,7 +64,7 @@ fun ControlScreen(
             color = colorScheme.background,
             contentColor = colorScheme.onBackground,
         ) {
-            Text("underconstruction")
+            Text("under construction")
         }
     }
 }

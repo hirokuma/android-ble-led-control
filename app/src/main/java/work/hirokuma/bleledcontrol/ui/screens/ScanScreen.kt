@@ -40,7 +40,7 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 @Composable
 fun ScanScreen(
     scanViewModel: ScanViewModel,
-    navControlScreen: (Device) -> Unit,
+    onItemClicked: (Device) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scanUiState by scanViewModel.uiState.collectAsState()
@@ -73,7 +73,7 @@ fun ScanScreen(
             BottomAppBar(
                 containerColor = containerColor,
                 contentColor = contentColor,
-                modifier = Modifier.clickable(onClick = { scanViewModel.onScanButtonClicked() }),
+                modifier = Modifier.clickable(onClick = { scanViewModel.startDeviceScan() }),
             ) {
                 Text(
                     text = stringResource(buttonId),
@@ -95,8 +95,7 @@ fun ScanScreen(
                 modifier = Modifier.padding(innerPadding),
                 scanning = scanUiState.scanning,
                 onItemClicked = {device ->
-                    scanViewModel.selectDevice(device)
-                    navControlScreen(device)
+                    onItemClicked(device)
                 },
             )
         }

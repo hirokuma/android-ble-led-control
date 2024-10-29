@@ -9,6 +9,8 @@ interface LedControlRepository {
     val searching: Boolean
     fun startDeviceSearch(callback: (Device) -> Unit)
     fun stopDeviceSearch()
+    fun connect(device: Device)
+    fun disconnect()
 }
 
 class BleLedControlRepository(
@@ -26,5 +28,15 @@ class BleLedControlRepository(
 
     override fun stopDeviceSearch() {
         bleScan.stopScan()
+    }
+
+    override fun connect(device: Device) {
+        Log.d(TAG, "connect: ${device.name}")
+        bleScan.connect(device)
+    }
+
+    override fun disconnect() {
+        Log.d(TAG, "disconnect")
+        bleScan.disconnect()
     }
 }
