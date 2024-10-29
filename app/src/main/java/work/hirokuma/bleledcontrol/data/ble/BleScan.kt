@@ -74,6 +74,7 @@ class BleScan(context: Context) {
                         address = result.device.address,
                         name = record.deviceName!!,
                         ssid = result.rssi,
+                        device = result.device,
                         scanRecord = record
                     )
                 )

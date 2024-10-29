@@ -45,7 +45,10 @@ class ScanViewModel @Inject constructor(
     fun onScanButtonClicked() {
         if (!controlRepository.searching) {
             _uiState.update {
-                it.copy(scanning = true)
+                it.copy(
+                    deviceList = emptyList(),
+                    scanning = true
+                )
             }
             Log.d(TAG, "onClickScan: start searching")
             controlRepository.startDeviceSearch { device ->
