@@ -37,7 +37,7 @@ class ScanViewModel @Inject constructor(
     fun selectDevice(device: Device) {
         _uiState.update { state ->
             state.copy(
-                selectedDevice = device.scanRecord,
+                selectedDevice = device,
             )
         }
     }

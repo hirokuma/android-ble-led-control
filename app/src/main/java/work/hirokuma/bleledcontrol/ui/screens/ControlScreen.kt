@@ -37,7 +37,7 @@ fun ControlScreen(
                     titleContentColor = colorScheme.primary,
                 ),
                 title = {
-                    Text(scanUiState.selectedDevice?.deviceName ?: "no name")
+                    Text(scanUiState.selectedDevice?.name ?: "no name")
                 }
             )
         },
