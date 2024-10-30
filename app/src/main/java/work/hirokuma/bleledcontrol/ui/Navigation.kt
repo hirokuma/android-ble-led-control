@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import work.hirokuma.bleledcontrol.ui.screens.ControlScreen
 import work.hirokuma.bleledcontrol.ui.screens.ScanScreen
-import work.hirokuma.bleledcontrol.ui.screens.ScanViewModel
+import work.hirokuma.bleledcontrol.ui.screens.LbsViewModel
 
 private const val TAG = "Navigation"
 
@@ -20,24 +20,24 @@ enum class NavRoute {
 @Composable
 fun MainNavigation() {
     val navController = rememberNavController()
-    val scanViewModel: ScanViewModel = hiltViewModel()
+    val lbsViewModel: LbsViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = NavRoute.Scan.name) {
         composable(NavRoute.Scan.name) {
             ScanScreen(
-                scanViewModel = scanViewModel,
+                lbsViewModel = lbsViewModel,
                 onItemClicked = { device ->
                     Log.d(TAG, "ScanScreen.onItemClicked")
-                    scanViewModel.connectDevice(device)
+                    lbsViewModel.connectDevice(device)
                     navController.navigate(NavRoute.Control.name)
                 }
             )
         }
         composable(NavRoute.Control.name) {
             ControlScreen(
-                scanViewModel = scanViewModel,
+                lbsViewModel = lbsViewModel,
                 onBackButtonClicked = {
-                    scanViewModel.disconnectDevice()
+                    lbsViewModel.disconnectDevice()
                     navController.popBackStack()
                 }
             )

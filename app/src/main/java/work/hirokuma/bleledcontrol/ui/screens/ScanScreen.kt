@@ -39,11 +39,11 @@ import work.hirokuma.bleledcontrol.ui.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(
-    scanViewModel: ScanViewModel,
+    lbsViewModel: LbsViewModel,
     onItemClicked: (Device) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scanUiState by scanViewModel.uiState.collectAsState()
+    val scanUiState by lbsViewModel.scanUiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -73,7 +73,7 @@ fun ScanScreen(
             BottomAppBar(
                 containerColor = containerColor,
                 contentColor = contentColor,
-                modifier = Modifier.clickable(onClick = { scanViewModel.startDeviceScan() }),
+                modifier = Modifier.clickable(onClick = { lbsViewModel.startDeviceScan() }),
             ) {
                 Text(
                     text = stringResource(buttonId),

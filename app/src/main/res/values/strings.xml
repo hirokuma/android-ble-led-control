@@ -1,6 +1,12 @@
 <resources>
     <string name="app_name">BLE LED Control</string>
     <string name="scan_button">scan</string>
-    <string name="scanning_button">scanning...</string>
+    <string name="scanning_button">scanning…</string>
     <string name="back_button">back</string>
+    <string name="led_control_row">LED control</string>
+    <string name="led_on_button">ON</string>
+    <string name="led_off_button">OFF</string>
+    <string name="button_state_row">Button state</string>
+    <string name="button_on_state">ON</string>
+    <string name="button_off_state">OFF</string>
 </resources>
