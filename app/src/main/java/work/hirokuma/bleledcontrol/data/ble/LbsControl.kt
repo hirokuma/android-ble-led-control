@@ -13,7 +13,12 @@ import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import work.hirokuma.bleledcontrol.data.Device
+import java.lang.Thread.State
 import java.util.UUID
 
 private const val TAG = "LbsControl"
@@ -34,6 +39,8 @@ class LbsControl(private val context: Context) {
     private var bleGatt: BluetoothGatt? = null
     private var ledCharacteristic: BluetoothGattCharacteristic? = null
     private var buttonCharacteristic: BluetoothGattCharacteristic? = null
+    private val _buttonState = MutableStateFlow(false)
+    val buttonState: StateFlow<Boolean> = _buttonState.asStateFlow()
 
     fun startScan(resultCallback: (Device) -> Unit): Boolean {
         if (scanning) {
@@ -193,6 +200,9 @@ class LbsControl(private val context: Context) {
                 super.onCharacteristicWrite(gatt, characteristic, status)
                 characteristic?.let {
                     Log.d(TAG, "onCharacteristicWrite: status=$status, uuid=${it.uuid}")
+                    if (it.uuid == BLINKY_BUTTON_CHARACTERISTIC_UUID) {
+                        Log.d(TAG, "button")
+                    }
                 }
             }
 
@@ -204,6 +214,12 @@ class LbsControl(private val context: Context) {
                 super.onCharacteristicChanged(gatt, characteristic)
                 characteristic?.let {
                     Log.d(TAG, "onCharacteristicChanged: deprecated: uuid=${it.uuid}, value=${it.value.toHexString()}")
+                    if (it.uuid == BLINKY_BUTTON_CHARACTERISTIC_UUID) {
+                        Log.d(TAG, "button")
+                        _buttonState.update { _ ->
+                            it.value[0].toInt() != 0x00
+                        }
+                    }
                 }
             }
 
@@ -214,6 +230,12 @@ class LbsControl(private val context: Context) {
             ) {
                 super.onCharacteristicChanged(gatt, characteristic, value)
                 Log.d(TAG, "onCharacteristicChanged: API33: value=${value.toHexString()}")
+                if (characteristic.uuid == BLINKY_BUTTON_CHARACTERISTIC_UUID) {
+                    Log.d(TAG, "button")
+                    _buttonState.update { _ ->
+                        value[0].toInt() != 0x00
+                    }
+                }
             }
 
             @Deprecated("Deprecated in Java")

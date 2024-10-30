@@ -42,6 +42,7 @@ fun ControlScreen(
     modifier: Modifier = Modifier,
 ) {
     val scanUiState by lbsViewModel.scanUiState.collectAsState()
+    val buttonState by lbsViewModel.buttonState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -78,9 +79,9 @@ fun ControlScreen(
             color = colorScheme.background,
             contentColor = colorScheme.onBackground,
         ) {
-            val buttonState = R.string.button_on_state
+            val resId = if (buttonState) R.string.button_on_state else R.string.button_off_state
             Control(
-                stringResource(buttonState),
+                stringResource(resId),
                 onSetButtonClicked = { lbsViewModel.setLed(true) },
                 onUnsetButtonClicked = { lbsViewModel.setLed(false) }
             )
@@ -100,7 +101,7 @@ fun Control(
             fontSize = 24.sp,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(colorScheme.primaryContainer)
         )
         Row(
             horizontalArrangement = Arrangement.SpaceAround,
@@ -125,7 +126,7 @@ fun Control(
             fontSize = 24.sp,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(colorScheme.primaryContainer)
         )
         Text(
             text = buttonStateText,

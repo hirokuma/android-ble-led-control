@@ -21,8 +21,7 @@ class LbsViewModel @Inject constructor(
     private val _scanUiState = MutableStateFlow(ScanUiState())
     val scanUiState: StateFlow<ScanUiState> = _scanUiState.asStateFlow()
 
-    private val _controlUiState = MutableStateFlow(ControlUiState())
-    val controlUiState: StateFlow<ControlUiState> = _controlUiState.asStateFlow()
+    val buttonState: StateFlow<Boolean> = controlRepository.buttonState
 
     private fun addDevice(device: Device) {
         if (_scanUiState.value.deviceList.find { it.address == device.address } != null) {

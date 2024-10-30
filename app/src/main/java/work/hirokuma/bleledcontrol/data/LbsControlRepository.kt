@@ -1,12 +1,15 @@
 package work.hirokuma.bleledcontrol.data
 
 import android.util.Log
+import kotlinx.coroutines.flow.StateFlow
 import work.hirokuma.bleledcontrol.data.ble.LbsControl
 
 private const val TAG = "LedControlRepository"
 
 interface LbsControlRepository {
     val searching: Boolean
+    val buttonState: StateFlow<Boolean>
+
     fun startDeviceSearch(callback: (Device) -> Unit)
     fun stopDeviceSearch()
     fun connect(device: Device)
@@ -19,6 +22,8 @@ class BleLbsControlRepository(
 ): LbsControlRepository {
     override val searching: Boolean
         get() = lbsControl.scanning
+    override val buttonState: StateFlow<Boolean>
+        get() = lbsControl.buttonState
 
     override fun startDeviceSearch(callback: (Device) -> Unit) {
         lbsControl.startScan { device ->
@@ -45,3 +50,4 @@ class BleLbsControlRepository(
         lbsControl.setLed(onoff)
     }
 }
+
