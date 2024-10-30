@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import work.hirokuma.bleledcontrol.data.Device
-import work.hirokuma.bleledcontrol.data.LedControlRepository
+import work.hirokuma.bleledcontrol.data.LbsControlRepository
 import javax.inject.Inject
 
 private const val TAG = "ScanViewModel"
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    private val controlRepository: LedControlRepository
+    private val controlRepository: LbsControlRepository
 ): ViewModel() {
     // UI state
     private val _uiState = MutableStateFlow(ScanUiState())

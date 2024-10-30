@@ -11,15 +11,14 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
-import android.net.wifi.aware.Characteristics
 import android.os.Build
 import android.util.Log
 import work.hirokuma.bleledcontrol.data.Device
 import java.util.UUID
 
-private const val TAG = "BleScan"
+private const val TAG = "LbsControl"
 
-class BleScan(private val context: Context) {
+class LbsControl(private val context: Context) {
     private val bluetoothLeScanner: BluetoothLeScanner
     init {
         val bluetoothManager = context.getSystemService(BluetoothManager::class.java)

@@ -1,11 +1,11 @@
 package work.hirokuma.bleledcontrol.data
 
 import android.util.Log
-import work.hirokuma.bleledcontrol.data.ble.BleScan
+import work.hirokuma.bleledcontrol.data.ble.LbsControl
 
 private const val TAG = "LedControlRepository"
 
-interface LedControlRepository {
+interface LbsControlRepository {
     val searching: Boolean
     fun startDeviceSearch(callback: (Device) -> Unit)
     fun stopDeviceSearch()
@@ -14,34 +14,34 @@ interface LedControlRepository {
     fun setLed(onoff: Boolean)
 }
 
-class BleLedControlRepository(
-    private val bleScan: BleScan
-): LedControlRepository {
+class BleLbsControlRepository(
+    private val lbsControl: LbsControl
+): LbsControlRepository {
     override val searching: Boolean
-        get() = bleScan.scanning
+        get() = lbsControl.scanning
 
     override fun startDeviceSearch(callback: (Device) -> Unit) {
-        bleScan.startScan { device ->
+        lbsControl.startScan { device ->
             Log.d(TAG, "callback: $device")
             callback(device)
         }
     }
 
     override fun stopDeviceSearch() {
-        bleScan.stopScan()
+        lbsControl.stopScan()
     }
 
     override fun connect(device: Device) {
         Log.d(TAG, "connect: ${device.name}")
-        bleScan.connect(device)
+        lbsControl.connect(device)
     }
 
     override fun disconnect() {
         Log.d(TAG, "disconnect")
-        bleScan.disconnect()
+        lbsControl.disconnect()
     }
 
     override fun setLed(onoff: Boolean) {
-        bleScan.setLed(onoff)
+        lbsControl.setLed(onoff)
     }
 }

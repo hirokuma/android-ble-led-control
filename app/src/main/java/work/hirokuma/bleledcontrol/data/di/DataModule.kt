@@ -6,29 +6,29 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import work.hirokuma.bleledcontrol.data.BleLedControlRepository
-import work.hirokuma.bleledcontrol.data.LedControlRepository
-import work.hirokuma.bleledcontrol.data.ble.BleScan
+import work.hirokuma.bleledcontrol.data.BleLbsControlRepository
+import work.hirokuma.bleledcontrol.data.LbsControlRepository
+import work.hirokuma.bleledcontrol.data.ble.LbsControl
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object LedControlRepositoryModule {
+object LbsControlRepositoryModule {
     @Singleton
     @Provides
-    fun provideLedControlRepository(bleScan: BleScan): LedControlRepository {
-        return BleLedControlRepository(bleScan)
+    fun provideLbsControlRepository(lbsControl: LbsControl): LbsControlRepository {
+        return BleLbsControlRepository(lbsControl)
     }
 }
 
 @Module
 @InstallIn(SingletonComponent::class)
-object BleScanModule {
+object LbsControlModule {
     @Singleton
     @Provides
-    fun provideBleScan(
+    fun provideLbsControl(
         @ApplicationContext context: Context
-    ): BleScan {
-        return BleScan(context)
+    ): LbsControl {
+        return LbsControl(context)
     }
 }
