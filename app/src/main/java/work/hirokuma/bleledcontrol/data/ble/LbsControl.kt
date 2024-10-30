@@ -2,10 +2,10 @@ package work.hirokuma.bleledcontrol.data.ble
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
@@ -141,20 +141,38 @@ class LbsControl(private val context: Context) {
                     Log.e(TAG, "onServicesDiscovered: Button characteristic not exist")
                     return
                 }
+                // 保持するようなものではない？
                 ledCharacteristic = ledChas
                 buttonCharacteristic = buttonChas
 
+                // ここで read すると次の write が動作せず notify されなくなる
+                // gatt.readCharacteristic(buttonCharacteristic)
+
+                // Notify有効
+                gatt.setCharacteristicNotification(buttonCharacteristic, true)
+                val descriptor = buttonCharacteristic!!.getDescriptor(CCCD_UUID)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Log.d(TAG, "writeDescriptor(API33)")
+                    gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+                } else {
+                    Log.d(TAG, "writeDescriptor(deprecated)")
+                    descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                    gatt.writeDescriptor(descriptor)
+                }
+
                 Log.d(TAG, "onServicesDiscovered: done")
-                gatt.readCharacteristic(buttonCharacteristic)
             }
 
+            @Deprecated("Deprecated in Java")
             override fun onCharacteristicRead(
                 gatt: BluetoothGatt?,
                 characteristic: BluetoothGattCharacteristic?,
                 status: Int
             ) {
                 super.onCharacteristicRead(gatt, characteristic, status)
-                Log.d(TAG, "onCharacteristicRead: deprecated: status=$status, value=${characteristic!!.value.toHexString()}")
+                characteristic?.let {
+                    Log.d(TAG, "onCharacteristicRead: deprecated: status=$status, uuid=${it.uuid}, value=${it.value.toHexString()}")
+                }
             }
 
             override fun onCharacteristicRead(
@@ -164,7 +182,7 @@ class LbsControl(private val context: Context) {
                 status: Int
             ) {
                 super.onCharacteristicRead(gatt, characteristic, value, status)
-                Log.d(TAG, "onCharacteristicRead: API33: status=$status, value=${value.toHexString()}")
+                Log.d(TAG, "onCharacteristicRead: API33: status=$status, uuid=${characteristic.uuid}, value=${value.toHexString()}")
             }
 
             override fun onCharacteristicWrite(
@@ -173,15 +191,20 @@ class LbsControl(private val context: Context) {
                 status: Int
             ) {
                 super.onCharacteristicWrite(gatt, characteristic, status)
-                Log.d(TAG, "onCharacteristicWrite: status=$status")
+                characteristic?.let {
+                    Log.d(TAG, "onCharacteristicWrite: status=$status, uuid=${it.uuid}")
+                }
             }
 
+            @Deprecated("Deprecated in Java")
             override fun onCharacteristicChanged(
                 gatt: BluetoothGatt?,
                 characteristic: BluetoothGattCharacteristic?
             ) {
                 super.onCharacteristicChanged(gatt, characteristic)
-                Log.d(TAG, "onCharacteristicChanged: deprecated")
+                characteristic?.let {
+                    Log.d(TAG, "onCharacteristicChanged: deprecated: uuid=${it.uuid}, value=${it.value.toHexString()}")
+                }
             }
 
             override fun onCharacteristicChanged(
@@ -193,6 +216,7 @@ class LbsControl(private val context: Context) {
                 Log.d(TAG, "onCharacteristicChanged: API33: value=${value.toHexString()}")
             }
 
+            @Deprecated("Deprecated in Java")
             override fun onDescriptorRead(
                 gatt: BluetoothGatt?,
                 descriptor: BluetoothGattDescriptor?,
@@ -264,10 +288,13 @@ class LbsControl(private val context: Context) {
         bleGatt = null
     }
 
+    // https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/libraries/bluetooth_services/services/lbs.html
     // https://github.com/NordicSemiconductor/Android-nRF-Blinky/blob/506cabe8884364cd4302cc490664ec020c42728b/blinky/spec/src/main/java/no/nordicsemi/android/blinky/spec/BlinkySpec.kt#L10
     companion object {
         val BLINKY_SERVICE_UUID: UUID = UUID.fromString("00001523-1212-efde-1523-785feabcd123")
         val BLINKY_BUTTON_CHARACTERISTIC_UUID: UUID = UUID.fromString("00001524-1212-efde-1523-785feabcd123")
         val BLINKY_LED_CHARACTERISTIC_UUID: UUID = UUID.fromString("00001525-1212-efde-1523-785feabcd123")
+
+        val CCCD_UUID: UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB")
     }
 }
