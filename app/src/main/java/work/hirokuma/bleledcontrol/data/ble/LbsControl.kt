@@ -109,7 +109,8 @@ class LbsControl(private val context: Context) {
                 super.onConnectionStateChange(gatt, status, newState)
                 Log.d(TAG, "onConnectionStateChange: status=$status, newState=$newState")
                 if (gatt == null || status != BluetoothGatt.GATT_SUCCESS) {
-                    Log.e(TAG, "onConnectionStateChange: not success")
+                    Log.e(TAG, "onConnectionStateChange: not success(status=${convertErrorStatus(status)})")
+                    disconnect()
                     return
                 }
                 when (newState) {
@@ -122,6 +123,7 @@ class LbsControl(private val context: Context) {
                     }
                     else -> {
                         Log.e(TAG, "onConnectionStateChange: unknown state($newState)")
+                        disconnect()
                     }
                 }
             }
@@ -130,22 +132,26 @@ class LbsControl(private val context: Context) {
                 super.onServicesDiscovered(gatt, status)
                 Log.d(TAG, "onServicesDiscovered: status=$status")
                 if (gatt == null || status != BluetoothGatt.GATT_SUCCESS) {
-                    Log.e(TAG, "onServicesDiscovered: failed")
+                    Log.e(TAG, "onServicesDiscovered: failed(status=${convertErrorStatus(status)})")
+                    disconnect()
                     return
                 }
                 val service = gatt.getService(BLINKY_SERVICE_UUID)
                 if (service == null) {
                     Log.e(TAG, "onServicesDiscovered: service not exist")
+                    disconnect()
                     return
                 }
                 val ledChas = service.getCharacteristic(BLINKY_LED_CHARACTERISTIC_UUID)
                 if (ledChas == null) {
                     Log.e(TAG, "onServicesDiscovered: LED characteristic not exist")
+                    disconnect()
                     return
                 }
                 val buttonChas = service.getCharacteristic(BLINKY_BUTTON_CHARACTERISTIC_UUID)
                 if (buttonChas == null) {
                     Log.e(TAG, "onServicesDiscovered: Button characteristic not exist")
+                    disconnect()
                     return
                 }
                 // 保持するようなものではない？
@@ -318,5 +324,42 @@ class LbsControl(private val context: Context) {
         val BLINKY_LED_CHARACTERISTIC_UUID: UUID = UUID.fromString("00001525-1212-efde-1523-785feabcd123")
 
         val CCCD_UUID: UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB")
+
+        fun convertErrorStatus(code: Int): String {
+            return when (code) {
+                0x00 -> "success"
+                0x01 -> "GATT_INVALID_HANDLE"
+                0x02 -> "GATT_READ_NOT_PERMIT"
+                0x03 -> "GATT_WRITE_NOT_PERMIT"
+                0x04 -> "GATT_INVALID_PDU"
+                0x05 -> "GATT_INSUF_AUTHENTICATION"
+                0x06 -> "GATT_REQ_NOT_SUPPORTED"
+                0x07 -> "GATT_INVALID_OFFSET"
+                0x08 -> "GATT_INSUF_AUTHORIZATION"
+                0x09 -> "GATT_PREPARE_Q_FULL"
+                0x0a -> "GATT_NOT_FOUND"
+                0x0b -> "GATT_NOT_LONG"
+                0x0c -> "GATT_INSUF_KEY_SIZE"
+                0x0d -> "GATT_INVALID_ATTR_LEN"
+                0x0e -> "GATT_ERR_UNLIKELY"
+                0x0f -> "GATT_INSUF_ENCRYPTION"
+                0x10 -> "GATT_UNSUPPORT_GRP_TYPE"
+                0x11 -> "GATT_INSUF_RESOURCE"
+                0x87 -> "GATT_ILLEGAL_PARAMETER"
+                0x80 -> "GATT_NO_RESOURCES"
+                0x81 -> "GATT_INTERNAL_ERROR"
+                0x82 -> "GATT_WRONG_STATE"
+                0x83 -> "GATT_DB_FULL"
+                0x84 -> "GATT_BUSY"
+                0x85 -> "GATT_ERROR"
+                0x86 -> "GATT_CMD_STARTED"
+                0x88 -> "GATT_PENDING"
+                0x89 -> "GATT_AUTH_FAIL"
+                0x8a -> "GATT_MORE"
+                0x8b -> "GATT_INVALID_CFG"
+                0x8c -> "GATT_SERVICE_STARTED"
+                else -> "unknown error code"
+            }
+        }
     }
 }
